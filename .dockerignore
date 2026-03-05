@@ -1,0 +1,14 @@
+.git
+build/
+dist/
+*.war
+*.class
+*.log
+.DS_Store
+.idea/
+*.iml
+.vscode/
+node_modules/
+README.md
+LICENSE
+issue.md

@@ -1,0 +1,35 @@
+services:
+  legacy-mysql:
+    image: mysql:5.7
+    container_name: legacy-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: legacy_db
+      MYSQL_USER: legacy_user
+      MYSQL_PASSWORD: legacy_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./config/mysql/01-create-tables.sql:/docker-entrypoint-initdb.d/01-create-tables.sql:ro
+      - ./config/mysql/02-seed-data.sql:/docker-entrypoint-initdb.d/02-seed-data.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "legacy_user", "-plegacy_pass"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: legacy-bookstore
+    ports:
+      - "8080:8080"
+    depends_on:
+      legacy-mysql:
+        condition: service_healthy
+
+volumes:
+  mysql-data:
